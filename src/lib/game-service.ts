@@ -1,7 +1,7 @@
 import { EventEmitter2, Listener, ListenerFn } from "eventemitter2";
 import { useSyncExternalStore } from "react";
 import { ResultType } from "../types";
-import { AssetLoadResult, AssetProxy, createAssetProxy, preloadAssets } from "./asset-manager";
+import { AssetLoadResult, AssetProxy, ProgressCallback, createAssetProxy, preloadAssets } from "./asset-manager";
 import { EventTracker, createEventTracker } from "./event-tracker";
 import { LevelManager, createLevelManager } from "./level-manager";
 import { Logger, createLogger } from "./logger";
@@ -103,12 +103,14 @@ export class GameService<T extends string = string> extends EventEmitter2 {
    * Preload assets like images, videos, sounds
    * Fetches resources and creates blob URLs
    * @param partialAssets - Assets to load, defaults to all assets
+   * @param onProgress - Optional callback to track loading progress
    * @returns Promise that resolves when loading attempts complete
    */
   async preloadAssets(
-    partialAssets: Record<string, string> = Object.getPrototypeOf(this.assets)
+    partialAssets: Record<string, string> = Object.getPrototypeOf(this.assets),
+    onProgress?: (progress: ProgressCallback) => void
   ): Promise<AssetLoadResult> {
-    return preloadAssets(partialAssets, this.assetsBasePath, this.logger);
+    return preloadAssets(partialAssets, this.assetsBasePath, this.logger, onProgress);
   }
 
   /**

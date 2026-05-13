@@ -68,48 +68,60 @@ export function validateAssetContentType(extension: string | undefined, contentT
   return !expectedTypes || expectedTypes.some((type) => contentType.includes(type));
 }
 
+export interface ProgressCallback {
+  loaded: number;
+  total: number;
+}
+
 /**
  * Preload assets and convert them to blob URLs
  */
 export async function preloadAssets(
   assets: Record<string, string>,
   assetsBasePath: string,
-  logger: Logger
+  logger: Logger,
+  onProgress?: (progress: ProgressCallback) => void,
 ): Promise<AssetLoadResult> {
+  const entriesToLoad = Object.entries(assets).filter(([_name, src]) => !src.startsWith("blob:"));
+  const total = entriesToLoad.length;
+  let loaded = 0;
+
   const results = await Promise.allSettled(
-    Object.entries(assets)
-      .filter(([_name, src]) => !src.startsWith("blob:"))
-      .map(([name, src]) =>
-        fetch(assetsBasePath + src)
-          .then((res) => {
-            if (!res.ok) {
-              throw new Error(`HTTP ${res.status}: Failed to fetch asset '${name}' from '${src}'`);
-            }
+    entriesToLoad.map(([name, src]) =>
+      fetch(assetsBasePath + src)
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(`HTTP ${res.status}: Failed to fetch asset '${name}' from '${src}'`);
+          }
 
-            // Validate content type for common asset types
-            const contentType = res.headers.get("content-type");
-            if (contentType) {
-              const extension = src.split(".").pop()?.toLowerCase();
-              const isValidType = validateAssetContentType(extension, contentType);
-              if (!isValidType) {
-                logger.warn(
-                  `Asset '${name}' content-type '${contentType}' may not match file extension '${extension}'`
-                );
-              }
+          // Validate content type for common asset types
+          const contentType = res.headers.get("content-type");
+          if (contentType) {
+            const extension = src.split(".").pop()?.toLowerCase();
+            const isValidType = validateAssetContentType(extension, contentType);
+            if (!isValidType) {
+              logger.warn(`Asset '${name}' content-type '${contentType}' may not match file extension '${extension}'`);
             }
+          }
 
-            return res.blob();
-          })
-          .then((blob) => {
-            assets[name] = URL.createObjectURL(blob);
-            logger.debug(`Successfully loaded asset: ${name}`);
-            return { name, success: true };
-          })
-          .catch((error) => {
-            logger.warn(`Failed to load asset '${name}':`, error.message);
-            return { name, success: false, error: error.message };
-          })
-      )
+          return res.blob();
+        })
+        .then((blob) => {
+          assets[name] = URL.createObjectURL(blob);
+          logger.debug(`Successfully loaded asset: ${name}`);
+
+          return { name, success: true };
+        })
+        .catch((error) => {
+          logger.warn(`Failed to load asset '${name}':`, error.message);
+          loaded++;
+          return { name, success: false, error: error.message };
+        })
+        .finally(() => {
+          loaded++;
+          onProgress?.({ loaded, total });
+        }),
+    ),
   );
 
   const failed = results
@@ -119,7 +131,7 @@ export async function preloadAssets(
   const successful = results
     .filter(
       (result): result is PromiseFulfilledResult<{ name: string; success: boolean }> =>
-        result.status === "fulfilled" && result.value.success
+        result.status === "fulfilled" && result.value.success,
     )
     .map((result) => result.value.name);
 

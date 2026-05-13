@@ -14,11 +14,10 @@
     "hooks",
     "components"
   ],
-  "author": "CREaiTORS",
-  "license": "MIT",
+  "author": "ss497254",
   "repository": {
     "type": "git",
-    "url": "https://github.com/CREaiTORS/gamez.git"
+    "url": "https://github.com/ss497254/gamez.git"
   },
   "scripts": {
     "test": "jest",
@@ -33,25 +32,24 @@
     "howler": "^2.2.4"
   },
   "devDependencies": {
-    "@testing-library/react": "^16.3.0",
+    "@testing-library/react": "^16.3.2",
     "@types/howler": "^2.2.11",
-    "@types/jest": "^29.5.14",
-    "@types/node": "^20.0.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^25.7.0",
     "@types/react": "^18.2.46",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
-    "eslint": "^8.0.0",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.4.0",
-    "jest": "^29.7.0",
-    "jest-environment-jsdom": "^29.7.0",
+    "@typescript-eslint/eslint-plugin": "^8.59.3",
+    "@typescript-eslint/parser": "^8.59.3",
+    "eslint": "^10.3.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "jest": "^30.4.2",
+    "jest-environment-jsdom": "^30.4.1",
     "ts-jest": "^29.3.1",
     "typescript": "^5.0.0"
   },
   "peerDependencies": {
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0",
-    "react-icons": ">=4.0.0",
     "tailwind-merge": ">=2.0.0",
     "zustand": ">=5.0.0"
   },

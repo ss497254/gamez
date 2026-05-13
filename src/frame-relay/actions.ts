@@ -2,10 +2,10 @@ import { getCommunicationHub } from "./hub-store";
 import { MessageType, SystemControlMethod } from "./message.interface";
 
 /**
- * Navigation actions for iframe communication
+ * Actions for iframe communication
  * Provides high-level actions that can be called from within an iframe
  */
-export class FrameRelayNavigationActions {
+export class FrameRelayActions {
   /**
    * Requests the parent window to navigate back
    * Typically used when a game or iframe content wants to return to the previous view
@@ -56,6 +56,20 @@ export class FrameRelayNavigationActions {
       return await hub.sendAsyncMessage(MessageType.CONTROL, SystemControlMethod.NAVIGATE_BACK);
     } catch (error) {
       console.error("Failed to request navigation back:", error);
+      throw error;
+    }
+  }
+
+  static async requestSessionCompleteAsync(): Promise<unknown> {
+    try {
+      const hub = getCommunicationHub();
+      if (!hub.isReady()) {
+        throw new Error("Communication hub not ready");
+      }
+
+      return await hub.sendAsyncMessage(MessageType.CONTROL, SystemControlMethod.SESSION_COMPLETE);
+    } catch (error) {
+      console.error("Failed to request session complete:", error);
       throw error;
     }
   }
